@@ -1,14 +1,18 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ResponseDto } from '@common/interfaces/gateway/response.interface';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { map } from 'rxjs';
+import { UseInterceptors } from '@nestjs/common';
+import { TcpLoggingInterceptor } from '@common/interceptors/tcpLogging.interceptor';
+import { TcpClient } from '@common/interfaces/tcp/common/tcp-client.interface';
+import { ProcessId } from '@common/decorators/processId.decorator';
 
 @Controller('app')
+@UseInterceptors(TcpLoggingInterceptor)
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    @Inject('TCP_INVOICE_SERVICE') private readonly invoiceClient: ClientProxy,
+    @Inject('TCP_INVOICE_SERVICE') private readonly invoiceClient: TcpClient,
   ) {}
 
   @Get()
@@ -18,8 +22,9 @@ export class AppController {
   }
 
   @Get('invoice')
-  async getInvoice() {
-    const result = await firstValueFrom(this.invoiceClient.send<string, number>('get_invoice', 1));
-    return new ResponseDto<string>({ data: result });
+  async getInvoice(@ProcessId() processId: string) {
+    return this.invoiceClient
+      .send<string, unknown>('get_invoice', { processId, data: { invoidId: 1, invoideName: 'Invoice 1' } })
+      .pipe(map((data) => new ResponseDto<string>(data)));
   }
 }
