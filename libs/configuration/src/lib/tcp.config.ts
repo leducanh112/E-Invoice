@@ -13,7 +13,7 @@ export class TcpConfiguration {
 
   constructor() {
     Object.entries(TCP_SERVICES).forEach(([key, serviceName]) => {
-      const host = process.env[`${key}_HOST`] || 'localhost';
+      const host = process.env[`${serviceName}_HOST`] || 'localhost';
       const port = Number(process.env[`${serviceName}_PORT`]);
       this[serviceName] = {
         transport: Transport.TCP,

@@ -6,7 +6,9 @@ export class BaseSchema {
   _id: ObjectId;
 
   @Virtual({
-    get: (doc: any) => doc._id.toString(),
+    get: function (this: BaseSchema) {
+      return this._id?.toString();
+    },
   })
   id: string;
 

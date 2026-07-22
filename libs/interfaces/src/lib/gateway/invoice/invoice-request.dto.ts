@@ -35,6 +35,10 @@ class ItemRequestDto {
 
   @ApiProperty()
   @IsNumber()
+  vatRate: number;
+
+  @ApiProperty()
+  @IsNumber()
   total: number;
 
   @ApiProperty()
